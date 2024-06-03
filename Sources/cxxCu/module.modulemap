@@ -1,0 +1,4 @@
+module cxxCu {
+    header "cuhead.h"
+    export *
+}
