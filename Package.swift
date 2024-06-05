@@ -1,8 +1,8 @@
 // swift-tools-version: 5.10
+// To turn on safetyCheck add -Xswiftc -DsafetyCheck flag
 
 import PackageDescription
 import Foundation
-
 let packageDir = URL(fileURLWithPath: #file).deletingLastPathComponent().path
 
 #if os(Windows)
@@ -31,11 +31,6 @@ let package = Package(
         .target(
             name: "cxxCu",
             publicHeadersPath: "include",
-            cxxSettings: [
-                .unsafeFlags([
-                    cuIncludePath,
-                ])
-            ],
             linkerSettings: [
                 .unsafeFlags([
                     cuLibPath,
@@ -46,12 +41,26 @@ let package = Package(
         .target(
             name: "SwiftCU",
             dependencies: ["cxxCu"],
+             cxxSettings: [
+                .unsafeFlags([
+                    cuIncludePath,
+                ])
+            ],
             swiftSettings: [
                 .interoperabilityMode(.Cxx),
+                .unsafeFlags(
+                    [
+                        "-Xcc", cuIncludePath,
+                        "-lcudart",
+                    ]
+                ),
             ]
         ),
         .testTarget(
             name: "SwiftCUTests",
-            dependencies: ["SwiftCU", "cxxCu"]),
-    ]
+            dependencies: ["SwiftCU", "cxxCu"]
+        ),
+            
+    ],
+    cxxLanguageStandard: nil // Only working with nil otherwise it tires to build C over Cxx for test target?
 )

@@ -57,16 +57,31 @@ public struct CUDAKernelArguments: ~Copyable {
 struct CUDevice {
     var index: Int32 = 0
 }
-
-extension cudaError {
-    var isSuccessful: Bool {
-        return self == .init(0)
+extension cudaError: Equatable {
+    static func == (lhs: cudaError, rhs: cudaError) -> Bool {
+        return lhs.rawValue == rhs.rawValue
     }
 }
 
+extension cudaError {
+    var isSuccessful: Bool {
+        return self == .cudaSuccess
+    }
+}
+
+extension cudaError_t {
+    var asSwift: cudaError {
+        return cudaError(rawValue: Int(self.rawValue))!
+    }
+}
+
+
 extension CUDevice {
     func setDevice() -> Bool {
-        let status: cudaError = cudaSetDevice(self.index)
+        let status = cudaSetDevice(self.index).asSwift
+        #if safetyCheck
+            precondition(status.isSuccessful, "Can't create device at idx: \(self.index) cudaErrorValue: \(status)")
+        #endif
         return status.isSuccessful
     }
 }
