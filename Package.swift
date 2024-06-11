@@ -1,9 +1,9 @@
-// swift-tools-version: 5.10
+// swift-tools-version: 6.0
 // To turn on safetyCheck add -Xswiftc -DsafetyCheck flag
 
 import PackageDescription
 import Foundation
-let packageDir = URL(fileURLWithPath: #file).deletingLastPathComponent().path
+// let packageDir = URL(fileURLWithPath: #file).deletingLastPathComponent().path
 
 #if os(Windows)
     let cuPath = ProcessInfo.processInfo.environment["CUDA_HOME"] ?? "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.4"
@@ -27,6 +27,7 @@ let package = Package(
             name: "cxxCu",
             targets: ["cxxCu"]),
     ],
+    dependencies: [.package(url: "https://github.com/apple/swift-testing.git", branch: "main")],
     targets: [
         .target(
             name: "cxxCu",
@@ -58,7 +59,7 @@ let package = Package(
         ),
         .testTarget(
             name: "SwiftCUTests",
-            dependencies: ["SwiftCU", "cxxCu"]
+            dependencies: [.product(name: "Testing", package: "swift-testing"), "SwiftCU", "cxxCu"]
         ),
             
     ],

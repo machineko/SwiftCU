@@ -1,15 +1,15 @@
-import XCTest
 @testable import SwiftCU
+import Testing
 
-final class SwiftCUTests: XCTestCase {
-    func testDeviceInit() throws {
+struct DeviceTest {
+    @Test func testDeviceInit() throws {
         let cuStatus = CUDevice(index: 0).setDevice()
         print(cuStatus)
-        XCTAssert(cuStatus)
+        #expect(cuStatus)
     }
 
-    func testDeviceInitFail() throws {
+    @Test  func testDeviceInitFail() throws {
         let cuStatus = CUDevice(index: -1).setDevice()
-        XCTAssert(!cuStatus)
+        #expect(!cuStatus)
     }
 }
