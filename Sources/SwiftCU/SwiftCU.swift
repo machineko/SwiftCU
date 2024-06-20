@@ -54,9 +54,12 @@ public struct CUDAKernelArguments: ~Copyable {
     }
 }
 
-struct CUDevice {
+public struct CUDevice: Sendable {
     var index: Int32 = 0
 }
+/// custom inits
+extension CUDevice {}
+
 extension cudaError: Equatable {
     static func == (lhs: cudaError, rhs: cudaError) -> Bool {
         return lhs.rawValue == rhs.rawValue
@@ -75,7 +78,7 @@ extension cudaError_t {
     }
 }
 
-
+/// Device creation extensions
 extension CUDevice {
     func setDevice() -> Bool {
         let status = cudaSetDevice(self.index).asSwift
@@ -84,4 +87,18 @@ extension CUDevice {
         #endif
         return status.isSuccessful
     }
+}
+
+extension CUDevice {
+    func getDeviceProperties() -> cudaDeviceProp {
+        var properties = cudaDeviceProp.init()
+        let status = cudaGetDeviceProperties_v2(&properties, self.index).asSwift
+        if status.isSuccessful {
+            return properties
+        }
+        else {
+            fatalError("Failed to get device properties for idx: \(self.index) cudaErrodrValue: \(status)")
+        }
+    }
+
 }

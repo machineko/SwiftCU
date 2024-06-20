@@ -1,5 +1,5 @@
 // swift-tools-version: 6.0
-// To turn on safetyCheck add -Xswiftc -DsafetyCheck flag
+// To turn on safetyCheck add -Xswiftc -DsafetyCheck
 
 import PackageDescription
 import Foundation
