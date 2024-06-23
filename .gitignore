@@ -9,3 +9,6 @@ DerivedData/
 .vscode
 .clangd
 Package.resolved
+build/*
+*.a
+.cache

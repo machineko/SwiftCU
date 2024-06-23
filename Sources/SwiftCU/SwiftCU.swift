@@ -1,5 +1,4 @@
 import cxxCu
-import Foundation
 
 extension UnsafeMutableRawPointer? {
     var cuPoint: UnsafeMutablePointer<UnsafeMutableRawPointer?> {
@@ -57,63 +56,19 @@ public struct CUDAKernelArguments: ~Copyable {
 public struct CUDevice: Sendable {
     var index: Int32 = 0
 }
-/// custom inits
-extension CUDevice {}
 
-extension cudaError: Equatable {
-    static func == (lhs: cudaError, rhs: cudaError) -> Bool {
-        return lhs.rawValue == rhs.rawValue
-    }
-}
 
-extension cudaError {
-    var isSuccessful: Bool {
-        return self == .cudaSuccess
-    }
-}
+public struct CUDAKernel {
+    let functionPointer: UnsafeRawPointer?
 
-extension cudaError_t {
-    var asSwift: cudaError {
-        return cudaError(rawValue: Int(self.rawValue))!
-    }
-}
-
-/// Device creation extensions
-extension CUDevice {
-    func setDevice() -> Bool {
-        let status = cudaSetDevice(self.index).asSwift
+    func launch(arguments: consuming CUDAKernelArguments, blockDim: dim3, gridDim: dim3, sharedMemory: Int = 0) -> cudaError {
+        let status = cudaLaunchKernel(
+            self.functionPointer, gridDim, blockDim, arguments.getArgsPointer(), sharedMemory, nil
+        ).asSwift
         #if safetyCheck
-            precondition(status.isSuccessful, "Can't create device at idx: \(self.index) cudaErrorValue: \(status)")
+            precondition(status.isSuccessful, "Can't launch kernel cudaErrorValue: \(status)")
         #endif
-        return status.isSuccessful
-    }
-}
-
-
-extension cudaUUID_t {
-     var asSwift: UUID {
-        let uuidBytes = withUnsafeBytes(of: self.bytes) { Data($0) }
-        return UUID(uuid: uuidBytes.withUnsafeBytes { $0.load(as: uuid_t.self) })
-    }
-}
-
-extension cudaDeviceProp {
-    var deviceName: String {
-        return withUnsafeBytes(of: self.name) { $0.bindMemory(to: CChar.self).baseAddress.map { String(cString: $0) } ?? "" }
-    }
-}
-
-
-extension CUDevice {
-    func getDeviceProperties() -> cudaDeviceProp {
-        var properties = cudaDeviceProp.init()
-        let status = cudaGetDeviceProperties_v2(&properties, self.index).asSwift
-        if status.isSuccessful {
-            return properties
-        }
-        else {
-            fatalError("Failed to get device properties for idx: \(self.index) cudaErrodrValue: \(status)")
-        }
+        return status
     }
 
 }

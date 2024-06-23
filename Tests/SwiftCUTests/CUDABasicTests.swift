@@ -24,3 +24,4 @@ struct DeviceTest {
         }
     #endif
 }
+
