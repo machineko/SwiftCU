@@ -27,7 +27,9 @@ let package = Package(
             name: "cxxCu",
             targets: ["cxxCu"]),
     ],
-    dependencies: [.package(url: "https://github.com/apple/swift-testing.git", branch: "main")],
+    dependencies: [
+            .package(url: "https://github.com/apple/swift-testing.git", branch: "main")
+        ],
     targets: [
         .target(
             name: "cxxCu",

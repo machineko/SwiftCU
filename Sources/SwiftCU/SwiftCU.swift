@@ -1,5 +1,5 @@
 import cxxCu
-
+import Foundation
 
 extension UnsafeMutableRawPointer? {
     var cuPoint: UnsafeMutablePointer<UnsafeMutableRawPointer?> {
@@ -88,6 +88,21 @@ extension CUDevice {
         return status.isSuccessful
     }
 }
+
+
+extension cudaUUID_t {
+     var asSwift: UUID {
+        let uuidBytes = withUnsafeBytes(of: self.bytes) { Data($0) }
+        return UUID(uuid: uuidBytes.withUnsafeBytes { $0.load(as: uuid_t.self) })
+    }
+}
+
+extension cudaDeviceProp {
+    var deviceName: String {
+        return withUnsafeBytes(of: self.name) { $0.bindMemory(to: CChar.self).baseAddress.map { String(cString: $0) } ?? "" }
+    }
+}
+
 
 extension CUDevice {
     func getDeviceProperties() -> cudaDeviceProp {

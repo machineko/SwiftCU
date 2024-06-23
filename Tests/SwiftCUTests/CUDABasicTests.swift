@@ -18,6 +18,7 @@ struct DeviceTest {
         @Test func testRTX3090Properties() throws {
             let device = CUDevice(index: 0)
             let prop = device.getDeviceProperties()
+            #expect(prop.deviceName == "NVIDIA GeForce RTX 3090")
             #expect(prop.major == 8)
             #expect(prop.minor == 6)
         }
