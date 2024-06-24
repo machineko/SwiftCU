@@ -1,4 +1,4 @@
-import cxxCu
+import cxxCU
 import Foundation
 /// custom inits
 extension CUDevice {}
@@ -76,37 +76,43 @@ extension cudaMemoryCopyType {
     }
 }
 
-extension UnsafeMutableRawPointer? {
-    // totalSize -> size in bytes
-    mutating func cudaMemoryAllocate(_ totalSize: Int) -> cudaError {
-        var tempPointer: UnsafeMutableRawPointer? = self
-        print("Before cudaMalloc: tempPointer = \(String(describing: tempPointer))")
-        let status = withUnsafeMutablePointer(to: &tempPointer) { pointer in
-            cudaMalloc(pointer, totalSize).asSwift
-        }
-        print("After cudaMalloc: tempPointer = \(String(describing: tempPointer))")
-        self = tempPointer
-        print("After assignment: self = \(String(describing: self))")
-        #if safetyCheck
+func cudaMemoryAllocate(pointer: inout UnsafeMutableRawPointer?, _ totalSize: Int) -> cudaError {    
+    let status = cudaMalloc(&pointer, totalSize).asSwift
+    
+
+    #if safetyCheck
         precondition(status.isSuccessful, "Can't allocate memory on device cudaErrorValue: \(status)")
+    #endif
+
+    return status
+}
+extension UnsafeMutableRawPointer? {
+
+     mutating func cudaMemoryAllocate(_ totalSize: Int) -> cudaError {
+        let status = cudaMalloc(&self, totalSize).asSwift
+
+        #if safetyCheck
+            precondition(status.isSuccessful, "Can't allocate memory on device cudaErrorValue: \(status)")
         #endif
+
         return status
     }
 
-    mutating func cudaMemoryCopy(to: [Float32], numberOfBytes: size_t, copyKind: cudaMemoryCopyType) -> cudaError {
-        let status = cudaMemcpy(self, to, numberOfBytes, copyKind.asCUDA).asSwift
+    mutating func cudaMemoryCopy(fromRawPointer: UnsafeRawPointer, numberOfBytes: size_t, copyKind: cudaMemoryCopyType) -> cudaError {
+        let status = cudaMemcpy(self, fromRawPointer, numberOfBytes, copyKind.asCUDA).asSwift
 
          #if safetyCheck
             precondition(status.isSuccessful, "Can't allocate memory on device cudaErrorValue: \(status)")
         #endif
         return status
     }
-}
 
-func cudaMemoryCopy(from: UnsafeMutableRawPointer?, to: UnsafeRawPointer?, numberOfBytes: size_t, copyKind: cudaMemoryCopyType) -> cudaError {
-    let status = cudaMemcpy(from, to, numberOfBytes, cudaMemcpyHostToDevice).asSwift
-    #if safetyCheck
-        precondition(status.isSuccessful, "Can't allocate memory on device cudaErrorValue: \(status)")
-    #endif
-    return status
+    mutating func cudaMemoryCopy(fromMutableRawPointer: UnsafeMutableRawPointer?, numberOfBytes: size_t, copyKind: cudaMemoryCopyType) -> cudaError {
+        let status = cudaMemcpy(self, fromMutableRawPointer, numberOfBytes, copyKind.asCUDA).asSwift
+
+         #if safetyCheck
+            precondition(status.isSuccessful, "Can't allocate memory on device cudaErrorValue: \(status)")
+        #endif
+        return status
+    }
 }

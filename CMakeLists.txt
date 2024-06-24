@@ -11,14 +11,14 @@ set(CMAKE_CUDA_STANDARD_REQUIRED True)
 set(CMAKE_CUDA_EXTENSIONS OFF) 
 set(CMAKE_CUDA_RUNTIME_LIBRARY Static)
 
-file(GLOB CUDA_FILES "Sources/cxxCu/testKernel/*.cu")
+file(GLOB CUDA_FILES "Sources/cxxCU/*.cu")
 
 add_library(cudaObjLib OBJECT ${CUDA_FILES})
 
-add_library(cuSwift STATIC
+add_library(cuADD STATIC
     $<TARGET_OBJECTS:cudaObjLib>
 )
 
-set_target_properties(cuSwift PROPERTIES
-    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/Sources/cxxCu/lib"
+set_target_properties(cuADD PROPERTIES
+    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/Sources/cxxCU/lib"
 )

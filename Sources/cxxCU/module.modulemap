@@ -1,4 +1,4 @@
-module cxxCu {
+module cxxCU {
     header "cuhead.hpp"
     export *
 }

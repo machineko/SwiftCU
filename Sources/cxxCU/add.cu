@@ -6,3 +6,16 @@ __global__ void addKernel(const float *a, const float *b, float *c, int size) {
         c[i] = a[i] + b[i];
     }
 }
+
+enum KernelID {
+    ADD_F32,
+};
+
+void* getKernelPointer(KernelID id) {
+    switch (id) {
+        case ADD_F32:
+            return (void*)addKernel;
+        default:
+            return nullptr;
+    }
+}

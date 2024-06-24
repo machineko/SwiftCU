@@ -1,4 +1,4 @@
-import cxxCu
+import cxxCU
 
 extension UnsafeMutableRawPointer? {
     var cuPoint: UnsafeMutablePointer<UnsafeMutableRawPointer?> {
