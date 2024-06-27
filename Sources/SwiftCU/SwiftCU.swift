@@ -57,7 +57,6 @@ public struct CUDevice: Sendable {
     var index: Int32 = 0
 }
 
-
 public struct CUDAKernel {
     let functionPointer: UnsafeRawPointer?
 
