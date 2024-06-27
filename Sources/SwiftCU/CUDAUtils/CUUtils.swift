@@ -13,6 +13,11 @@ extension cudaError {
     var isSuccessful: Bool {
         return self == .cudaSuccess
     }
+
+    @inline(__always)
+    func safetyCheckCondition(message: String) {
+        precondition(self.isSuccessful, "\(message): cudaErrorValue: \(self)")
+    }
 }
 
 extension cudaError_t {
@@ -53,7 +58,7 @@ extension CUDevice {
     func setDevice() -> Bool {
         let status = cudaSetDevice(self.index).asSwift
         #if safetyCheck
-            precondition(status.isSuccessful, "Can't create device at idx: \(self.index) cudaErrorValue: \(status)")
+            status.safetyCheckCondition(message: "Can't create device at idx: \(self.index)")
         #endif
         return status.isSuccessful
     }
@@ -76,33 +81,44 @@ extension cudaMemoryCopyType {
     }
 }
 
-func cudaMemoryAllocate(pointer: inout UnsafeMutableRawPointer?, _ totalSize: Int) -> cudaError {    
-    let status = cudaMalloc(&pointer, totalSize).asSwift
-    
+struct cudaStream: ~Copyable {
+    var stream: cudaStream_t?
 
-    #if safetyCheck
-        precondition(status.isSuccessful, "Can't allocate memory on device cudaErrorValue: \(status)")
-    #endif
+    init() {
+        let status = cudaStreamCreate(&self.stream).asSwift
+        print(status, "XD")
+        status.safetyCheckCondition(message: "Can't create stream")
+    }
 
-    return status
+    func sync() -> cudaError {
+        let status = cudaStreamSynchronize(self.stream).asSwift
+        #if safetyCheck
+             status.safetyCheckCondition(message: "Can't synchronize stream")
+        #endif
+        return status
+    }
+
+    deinit {
+        let status = cudaStreamDestroy(self.stream)
+        #if safetyCheck
+            status.safetyCheckCondition(message: "Can't destroy stream")
+        #endif
+    }
 }
-extension UnsafeMutableRawPointer? {
 
+extension UnsafeMutableRawPointer? {
      mutating func cudaMemoryAllocate(_ totalSize: Int) -> cudaError {
         let status = cudaMalloc(&self, totalSize).asSwift
-
         #if safetyCheck
-            precondition(status.isSuccessful, "Can't allocate memory on device cudaErrorValue: \(status)")
+            status.safetyCheckCondition(message: "Can't allocate memory on device")
         #endif
-
         return status
     }
 
     mutating func cudaMemoryCopy(fromRawPointer: UnsafeRawPointer, numberOfBytes: size_t, copyKind: cudaMemoryCopyType) -> cudaError {
         let status = cudaMemcpy(self, fromRawPointer, numberOfBytes, copyKind.asCUDA).asSwift
-
-         #if safetyCheck
-            precondition(status.isSuccessful, "Can't allocate memory on device cudaErrorValue: \(status)")
+        #if safetyCheck
+            status.safetyCheckCondition(message: "Can't copy memory from UnsafeRawPointer copyKind \(copyKind)")
         #endif
         return status
     }
@@ -110,9 +126,26 @@ extension UnsafeMutableRawPointer? {
     mutating func cudaMemoryCopy(fromMutableRawPointer: UnsafeMutableRawPointer?, numberOfBytes: size_t, copyKind: cudaMemoryCopyType) -> cudaError {
         let status = cudaMemcpy(self, fromMutableRawPointer, numberOfBytes, copyKind.asCUDA).asSwift
 
-         #if safetyCheck
-            precondition(status.isSuccessful, "Can't allocate memory on device cudaErrorValue: \(status)")
+        #if safetyCheck
+            status.safetyCheckCondition(message: "Can't copy memory from UnsafeRawPointer copyKind \(copyKind)")
         #endif
         return status
     }
+
+    mutating func cudaMemoryCopyAsync(fromRawPointer: UnsafeRawPointer, numberOfBytes: size_t, copyKind: cudaMemoryCopyType, stream: borrowing cudaStream) -> cudaError {
+        let status = cudaMemcpyAsync(self, fromRawPointer, numberOfBytes, copyKind.asCUDA).asSwift
+        #if safetyCheck
+            status.safetyCheckCondition(message: "Can't copy memory from UnsafeRawPointer copyKind \(copyKind)")
+        #endif
+        return status
+    }
+
+    mutating func cudaMemoryCopyAsync(fromMutableRawPointer: UnsafeMutableRawPointer?, numberOfBytes: size_t, copyKind: cudaMemoryCopyType, stream: borrowing cudaStream) -> cudaError {
+        let status = cudaMemcpyAsync(self, fromMutableRawPointer, numberOfBytes, copyKind.asCUDA, stream.stream).asSwift
+        #if safetyCheck
+            status.safetyCheckCondition(message: "Can't copy memory from UnsafeRawPointer copyKind \(copyKind)")
+        #endif
+        return status
+    }
+
 }
