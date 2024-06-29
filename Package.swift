@@ -30,7 +30,7 @@ let package = Package(
             targets: ["cxxCU"]),
     ],
     dependencies: [
-            .package(url: "https://github.com/apple/swift-testing.git", branch: "main")
+            .package(url: "https://github.com/apple/swift-testing.git", from: "0.2.0")
         ],
     targets: [
         .target(
@@ -57,10 +57,14 @@ let package = Package(
         ),
         .testTarget(
             name: "SwiftCUTests",
-
+           
             dependencies: [
+                "SwiftCU", "cxxCU",
                 .product(name: "Testing", package: "swift-testing"), 
-                "SwiftCU", "cxxCU"
+
+            ],
+             swiftSettings: [
+                .interoperabilityMode(.Cxx),
             ]
         )
     ],
@@ -68,6 +72,4 @@ let package = Package(
 )
 
 ///flags 
-/// -Xswiftc -cxx-interoperability-mode=default -Xswiftc -L/usr/local/cuda/lib64 
-/// -Xswiftc -I/usr/local/cuda/include -Xswiftc -L$(pwd)/Sources/cxxCU/lib 
-/// -Xswiftc -Drtx3090Test -Xswiftc -lcuADD
+/// -Xswiftc -L/usr/local/cuda/lib64 -Xswiftc -I/usr/local/cuda/include -Xswiftc -L$(pwd)/Sources/cxxCU/lib -Xswiftc -Drtx3090Test -Xswiftc -lcuADD

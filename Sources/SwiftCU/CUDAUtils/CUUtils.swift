@@ -85,7 +85,6 @@ struct cudaStream: ~Copyable {
 
     init() {
         let status = cudaStreamCreate(&self.stream).asSwift
-        print(status, "XD")
         status.safetyCheckCondition(message: "Can't create stream")
     }
 
