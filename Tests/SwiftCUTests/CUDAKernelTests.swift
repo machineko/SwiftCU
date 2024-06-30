@@ -1,4 +1,5 @@
 import Testing
+import Foundation
 @testable import SwiftCU
 @testable import cxxCU
 
@@ -12,12 +13,10 @@ struct KernelTest {
         var outArray = [Float32](repeating: 0.0, count: hostArray.count)
         let arrayBytes: Int = hostArray.count * MemoryLayout<Float32>.size
 
-        let deviceStatus = CUDevice(index: 0).setDevice()
-        #expect(deviceStatus, "Can't set device \(deviceStatus)")
-        
+
         var aPointer: UnsafeMutableRawPointer?
         defer {
-            let deallocateStatus = aPointer.cudaDealocate()
+            let deallocateStatus = aPointer.cudaAndHostDeallocate()
             #expect(deallocateStatus.isSuccessful, "Can't dealocate aPointer \(deallocateStatus)")
         }
         let allocateStatus = aPointer.cudaMemoryAllocate(arrayBytes)
@@ -36,12 +35,54 @@ struct KernelTest {
         #expect(syncStatus.isSuccessful, "Can't sync stream \(syncStatus)")
         cudaDeviceSynchronize()
         #expect((0..<hostArray.count).allSatisfy { outArray[$0] == hostArray[$0]})
-        
+    }
+
+    @Test func testCUDAPointerAttribute() async throws {
+        let arrayBytes: Int = 64 * MemoryLayout<Float32>.size
+
+        let deviceStatus = CUDevice(index: 0).setDevice()
+        #expect(deviceStatus, "Can't set device \(deviceStatus)")
+
+        var aPointer: UnsafeMutableRawPointer?
+        let attributesPreAllocation: cudaPointerAttributes = aPointer.getCUDAAttributes()
+        #expect(attributesPreAllocation.type == cudaMemoryType.init(0), "Memory is allocated already")
+
+        let allocateStatus = aPointer.cudaMemoryAllocate(arrayBytes)
+        #expect(allocateStatus.isSuccessful, "Can't allocate memory for aPointer \(allocateStatus)")
+
+        let attributesPostAllocation: cudaPointerAttributes = aPointer.getCUDAAttributes()
+        #expect(attributesPostAllocation.type == cudaMemoryType.init(2), "Memory is not allocated on device")
+
     }
 
 
+    @Test func testCUDADealloc() async throws {
+        let arrayBytes: Int = 64 * MemoryLayout<Float32>.size
+
+        let deviceStatus = CUDevice(index: 0).setDevice()
+        #expect(deviceStatus, "Can't set device \(deviceStatus)")
+        
+        var aPointer: UnsafeMutableRawPointer?
+        
+        let attributesPreAllocation: cudaPointerAttributes = aPointer.getCUDAAttributes()
+        #expect(attributesPreAllocation.type == cudaMemoryType.init(0), "Memory is allocated already")
+        #expect(aPointer.isAllocatedOnDevice() == false, "Memory is allocated on device")
+
+        let allocateStatus = aPointer.cudaMemoryAllocate(arrayBytes)
+        #expect(allocateStatus.isSuccessful, "Can't allocate memory for aPointer \(allocateStatus)")
+
+        let attributesPostAllocation: cudaPointerAttributes = aPointer.getCUDAAttributes()
+        #expect(attributesPostAllocation.type == cudaMemoryType.init(2), "Memory type != cudaMemoryTypeDevice")
+        #expect(aPointer.isAllocatedOnDevice() == true, "Memory is not allocated on device")
+
+        let deallocateStatus = aPointer.cudaAndHostDeallocate()
+        #expect(deallocateStatus.isSuccessful, "Memory can't be deallocated \(deallocateStatus)")
+    }
+
+
+
     #if rtx3090Test
-        @Test func testAddKernel() throws {
+        @Test func testAddKernel() async throws {
             let arraySize: Int = 32
             let arrayBytes: Int = arraySize * MemoryLayout<Float32>.size
             let deviceStatus = CUDevice(index: 0).setDevice()
@@ -99,11 +140,12 @@ struct KernelTest {
                 #expect(outStatus.isSuccessful, "Can't copy memory from device \(syncStatus)")
             }
             defer {
-                var deallocateStatus = aPointer.cudaDealocate()
+                var deallocateStatus = aPointer.cudaAndHostDeallocate()
+                #expect(aPointer == nil)
                 #expect(deallocateStatus.isSuccessful, "Can't dealocate aPointer \(deallocateStatus)")
-                deallocateStatus = bPointer.cudaDealocate()
+                deallocateStatus = bPointer.cudaAndHostDeallocate()
                 #expect(deallocateStatus.isSuccessful, "Can't dealocate bPointer \(deallocateStatus)")
-                deallocateStatus = cPointer.cudaDealocate()
+                deallocateStatus = cPointer.cudaAndHostDeallocate()
                 #expect(deallocateStatus.isSuccessful, "Can't dealocate cPointer \(deallocateStatus)")
             }
 

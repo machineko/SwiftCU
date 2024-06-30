@@ -105,7 +105,27 @@ struct cudaStream: ~Copyable {
 }
 
 extension UnsafeMutableRawPointer? {
-    mutating func cudaDealocate() -> cudaError {
+    func isAllocatedOnDevice() -> Bool {
+        return self.getCUDAAttributes().devicePointer != nil
+    }
+
+    func isAllocatedOnHost() -> Bool {
+        return self.getCUDAAttributes().hostPointer != nil
+    }
+
+    func getCUDAAttributes() -> cudaPointerAttributes {
+        var attributes: cudaPointerAttributes = cudaPointerAttributes()
+        let status = cudaPointerGetAttributes(&attributes, self).asSwift
+        #if safetyCheck
+            status.safetyCheckCondition(message: "Can't get cuda pointer attributes")
+        #endif
+        return attributes
+    }
+}
+
+extension UnsafeMutableRawPointer? {
+    // Deallocate device memory
+    mutating func cudaDeallocate() -> cudaError {
         let status = cudaFree(self).asSwift
         #if safetyCheck
             status.safetyCheckCondition(message: "Can't free memory on device")
@@ -113,6 +133,16 @@ extension UnsafeMutableRawPointer? {
         return status
     }
 
+    /// Dealloate memory on device and make self equal to nil to ensure proper cleanup of pointers, This won't deallocate host data
+    /// If you want to deallocate host memory use .deallocate() for Swift or .cudaFreeHost() for CUDA allocated memory
+    mutating func cudaAndHostDeallocate() -> cudaError {
+        let status = cudaFree(self).asSwift
+        #if safetyCheck
+            status.safetyCheckCondition(message: "Can't free memory on device")
+        #endif
+        self = nil
+        return status
+    }
     mutating func cudaMemoryAllocate(_ totalSize: Int) -> cudaError {
         let status = cudaMalloc(&self, totalSize).asSwift
         #if safetyCheck

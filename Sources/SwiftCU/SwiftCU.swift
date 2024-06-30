@@ -53,7 +53,7 @@ public struct CUDAKernelArguments: ~Copyable {
     }
 }
 
-public struct CUDevice: Sendable {
+public struct CUDevice: Sendable, ~Copyable {
     var index: Int32 = 0
 }
 
