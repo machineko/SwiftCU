@@ -19,8 +19,6 @@ struct DeviceTest {
         #expect(stream.stream != nil)
     }
 
-
-
     #if rtx3090Test
         @Test func testRTX3090Properties() async throws {
             let device = CUDevice(index: 0)

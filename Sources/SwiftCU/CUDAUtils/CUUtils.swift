@@ -105,6 +105,14 @@ struct cudaStream: ~Copyable {
 }
 
 extension UnsafeMutableRawPointer? {
+    mutating func cudaDealocate() -> cudaError {
+        let status = cudaFree(self).asSwift
+        #if safetyCheck
+            status.safetyCheckCondition(message: "Can't free memory on device")
+        #endif
+        return status
+    }
+
     mutating func cudaMemoryAllocate(_ totalSize: Int) -> cudaError {
         let status = cudaMalloc(&self, totalSize).asSwift
         #if safetyCheck

@@ -16,21 +16,27 @@ struct KernelTest {
         #expect(deviceStatus, "Can't set device \(deviceStatus)")
         
         var aPointer: UnsafeMutableRawPointer?
+        defer {
+            let deallocateStatus = aPointer.cudaDealocate()
+            #expect(deallocateStatus.isSuccessful, "Can't dealocate aPointer \(deallocateStatus)")
+        }
         let allocateStatus = aPointer.cudaMemoryAllocate(arrayBytes)
         #expect(allocateStatus.isSuccessful, "Can't allocate memory for aPointer \(allocateStatus)")
 
         var copyStatus = aPointer.cudaMemoryCopyAsync(fromRawPointer: &hostArray, numberOfBytes: arrayBytes, copyKind: .cudaMemcpyHostToDevice, stream: stream)
         #expect(copyStatus.isSuccessful, "Can't copy memory for aPointer \(copyStatus)")
 
-        var outputPointer: UnsafeMutableRawPointer? = outArray.withUnsafeMutableBytes { rawBufferPointer in
-            return rawBufferPointer.baseAddress
+        outArray.withUnsafeMutableBytes { rawBufferPointer in
+            var address: UnsafeMutableRawPointer? = rawBufferPointer.baseAddress
+            copyStatus = address.cudaMemoryCopyAsync(fromMutableRawPointer: aPointer, numberOfBytes: arrayBytes, copyKind: .cudaMemcpyDeviceToHost, stream: stream)
+            #expect(copyStatus.isSuccessful, "Can't copy memory from device \(copyStatus)")
         }
-        copyStatus = outputPointer.cudaMemoryCopyAsync(fromMutableRawPointer: aPointer, numberOfBytes: arrayBytes, copyKind: .cudaMemcpyDeviceToHost, stream: stream)
-        #expect(copyStatus.isSuccessful, "Can't copy memory from device \(copyStatus)")
+
         let syncStatus = stream.sync()
         #expect(syncStatus.isSuccessful, "Can't sync stream \(syncStatus)")
         cudaDeviceSynchronize()
         #expect((0..<hostArray.count).allSatisfy { outArray[$0] == hostArray[$0]})
+        
     }
 
 
@@ -87,11 +93,20 @@ struct KernelTest {
             #expect(syncStatus.asSwift.isSuccessful, "Can't sync device \(syncStatus)")
 
             var outputData = [Float32](repeating: 0, count: arraySize)
-            var outputPointer: UnsafeMutableRawPointer? = outputData.withUnsafeMutableBytes { rawBufferPointer in
-                return rawBufferPointer.baseAddress
+            outputData.withUnsafeMutableBytes { rawBufferPointer in
+                var pointerAddress = rawBufferPointer.baseAddress
+                let outStatus = pointerAddress.cudaMemoryCopy(fromMutableRawPointer: cPointer, numberOfBytes: arrayBytes, copyKind: .cudaMemcpyDeviceToHost)
+                #expect(outStatus.isSuccessful, "Can't copy memory from device \(syncStatus)")
             }
-            let outStatus = outputPointer.cudaMemoryCopy(fromMutableRawPointer: cPointer, numberOfBytes: arrayBytes, copyKind: .cudaMemcpyDeviceToHost)
-            #expect(outStatus.isSuccessful, "Can't copy memory from device \(syncStatus)")
+            defer {
+                var deallocateStatus = aPointer.cudaDealocate()
+                #expect(deallocateStatus.isSuccessful, "Can't dealocate aPointer \(deallocateStatus)")
+                deallocateStatus = bPointer.cudaDealocate()
+                #expect(deallocateStatus.isSuccessful, "Can't dealocate bPointer \(deallocateStatus)")
+                deallocateStatus = cPointer.cudaDealocate()
+                #expect(deallocateStatus.isSuccessful, "Can't dealocate cPointer \(deallocateStatus)")
+            }
+
 
             for i in 0..<32 {
                 let expectedValue = a[i] + b[i]
