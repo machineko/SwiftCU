@@ -1,5 +1,6 @@
-import Testing
 import Foundation
+import Testing
+
 @testable import SwiftCU
 @testable import cxxCU
 
@@ -13,7 +14,6 @@ struct KernelTest {
         var outArray = [Float32](repeating: 0.0, count: hostArray.count)
         let arrayBytes: Int = hostArray.count * MemoryLayout<Float32>.size
 
-
         var aPointer: UnsafeMutableRawPointer?
         defer {
             let deallocateStatus = aPointer.cudaAndHostDeallocate()
@@ -22,19 +22,21 @@ struct KernelTest {
         let allocateStatus = aPointer.cudaMemoryAllocate(arrayBytes)
         #expect(allocateStatus.isSuccessful, "Can't allocate memory for aPointer \(allocateStatus)")
 
-        var copyStatus = aPointer.cudaMemoryCopyAsync(fromRawPointer: &hostArray, numberOfBytes: arrayBytes, copyKind: .cudaMemcpyHostToDevice, stream: stream)
+        var copyStatus = aPointer.cudaMemoryCopyAsync(
+            fromRawPointer: &hostArray, numberOfBytes: arrayBytes, copyKind: .cudaMemcpyHostToDevice, stream: stream)
         #expect(copyStatus.isSuccessful, "Can't copy memory for aPointer \(copyStatus)")
 
         outArray.withUnsafeMutableBytes { rawBufferPointer in
             var address: UnsafeMutableRawPointer? = rawBufferPointer.baseAddress
-            copyStatus = address.cudaMemoryCopyAsync(fromMutableRawPointer: aPointer, numberOfBytes: arrayBytes, copyKind: .cudaMemcpyDeviceToHost, stream: stream)
+            copyStatus = address.cudaMemoryCopyAsync(
+                fromMutableRawPointer: aPointer, numberOfBytes: arrayBytes, copyKind: .cudaMemcpyDeviceToHost, stream: stream)
             #expect(copyStatus.isSuccessful, "Can't copy memory from device \(copyStatus)")
         }
 
         let syncStatus = stream.sync()
         #expect(syncStatus.isSuccessful, "Can't sync stream \(syncStatus)")
         cudaDeviceSynchronize()
-        #expect((0..<hostArray.count).allSatisfy { outArray[$0] == hostArray[$0]})
+        #expect((0..<hostArray.count).allSatisfy { outArray[$0] == hostArray[$0] })
     }
 
     @Test func testCUDAPointerAttribute() async throws {
@@ -55,15 +57,14 @@ struct KernelTest {
 
     }
 
-
     @Test func testCUDADealloc() async throws {
         let arrayBytes: Int = 64 * MemoryLayout<Float32>.size
 
         let deviceStatus = CUDevice(index: 0).setDevice()
         #expect(deviceStatus, "Can't set device \(deviceStatus)")
-        
+
         var aPointer: UnsafeMutableRawPointer?
-        
+
         let attributesPreAllocation: cudaPointerAttributes = aPointer.getCUDAAttributes()
         #expect(attributesPreAllocation.type == cudaMemoryType.init(0), "Memory is allocated already")
         #expect(aPointer.isAllocatedOnDevice() == false, "Memory is allocated on device")
@@ -79,15 +80,13 @@ struct KernelTest {
         #expect(deallocateStatus.isSuccessful, "Memory can't be deallocated \(deallocateStatus)")
     }
 
-
-
     #if rtx3090Test
         @Test func testAddKernel() async throws {
             let arraySize: Int = 32
             let arrayBytes: Int = arraySize * MemoryLayout<Float32>.size
             let deviceStatus = CUDevice(index: 0).setDevice()
             #expect(deviceStatus, "Can't set device \(deviceStatus)")
-            
+
             var aPointer: UnsafeMutableRawPointer?
             var bPointer: UnsafeMutableRawPointer?
             var cPointer: UnsafeMutableRawPointer?
@@ -110,11 +109,9 @@ struct KernelTest {
             #expect(copyStatus.isSuccessful, "Can't copy memory for aPointer \(copyStatus)")
             copyStatus = bPointer.cudaMemoryCopy(fromRawPointer: &b, numberOfBytes: arrayBytes, copyKind: .cudaMemcpyHostToDevice)
             #expect(copyStatus.isSuccessful, "Can't copy memory for bPointer \(copyStatus)")
-            
 
             var kernelArgs = CUDAKernelArguments()
             kernelArgs.addRawPointers([aPointer, bPointer, cPointer])
-
 
             var someValue = Int32(arraySize)
             kernelArgs.addPointer(&someValue)
@@ -136,7 +133,8 @@ struct KernelTest {
             var outputData = [Float32](repeating: 0, count: arraySize)
             outputData.withUnsafeMutableBytes { rawBufferPointer in
                 var pointerAddress = rawBufferPointer.baseAddress
-                let outStatus = pointerAddress.cudaMemoryCopy(fromMutableRawPointer: cPointer, numberOfBytes: arrayBytes, copyKind: .cudaMemcpyDeviceToHost)
+                let outStatus = pointerAddress.cudaMemoryCopy(
+                    fromMutableRawPointer: cPointer, numberOfBytes: arrayBytes, copyKind: .cudaMemcpyDeviceToHost)
                 #expect(outStatus.isSuccessful, "Can't copy memory from device \(syncStatus)")
             }
             defer {
@@ -149,10 +147,10 @@ struct KernelTest {
                 #expect(deallocateStatus.isSuccessful, "Can't dealocate cPointer \(deallocateStatus)")
             }
 
-
             for i in 0..<32 {
                 let expectedValue = a[i] + b[i]
-                #expect(outputData[i] == a[i] + b[i], "results of addition not equal to expected value \(outputData[i]) != \(expectedValue)")
+                #expect(
+                    outputData[i] == a[i] + b[i], "results of addition not equal to expected value \(outputData[i]) != \(expectedValue)")
             }
         }
     #endif

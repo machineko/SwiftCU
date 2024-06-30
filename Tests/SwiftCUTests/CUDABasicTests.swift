@@ -1,4 +1,5 @@
 import Testing
+
 @testable import SwiftCU
 
 struct DeviceTest {
@@ -29,4 +30,3 @@ struct DeviceTest {
         }
     #endif
 }
-
