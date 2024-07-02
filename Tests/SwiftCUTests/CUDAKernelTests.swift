@@ -110,7 +110,7 @@ struct KernelTest {
             copyStatus = bPointer.cudaMemoryCopy(fromRawPointer: &b, numberOfBytes: arrayBytes, copyKind: .cudaMemcpyHostToDevice)
             #expect(copyStatus.isSuccessful, "Can't copy memory for bPointer \(copyStatus)")
 
-            var kernelArgs = CUDAKernelArguments()
+            var kernelArgs: CUDAKernelArguments = CUDAKernelArguments()
             kernelArgs.addRawPointers([aPointer, bPointer, cPointer])
 
             var someValue = Int32(arraySize)
@@ -121,11 +121,10 @@ struct KernelTest {
             let gridDim = dim3(make_uint3(UInt32(blocksPerGrid), 1, 1))
             var syncStatus = cudaDeviceSynchronize()
             #expect(syncStatus.asSwift.isSuccessful, "Can't sync device \(syncStatus)")
-
-            let launchStatus = cudaLaunchKernel(
-                getKernelPointer(ADD_F32), gridDim, blockDim, kernelArgs.getArgsPointer(), 0, nil
-            )
-            #expect(launchStatus.asSwift.isSuccessful, "Can't launch kernel \(launchStatus)")
+            let kernel = CUDAKernel(functionPointer: getKernelPointer(ADD_F32))
+            let launchStatus = kernel.launch(arguments: kernelArgs, blockDim: blockDim, gridDim: gridDim)
+        
+            #expect(launchStatus.isSuccessful, "Can't launch kernel \(launchStatus)")
 
             syncStatus = cudaDeviceSynchronize()
             #expect(syncStatus.asSwift.isSuccessful, "Can't sync device \(syncStatus)")
