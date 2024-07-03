@@ -158,12 +158,10 @@ struct CUDAMemBasicTest {
         #expect(deallocateStatus.isSuccessful, "Memory can't be deallocated \(deallocateStatus)")
     }
 
-
-
 }
 /// This tests should be run on device that isn't using GPU at moment of running tests
 /// Tests assume that no memory will be allocated on device memory while running
-struct CUDATestMemComplex { 
+struct CUDATestMemComplex {
     func testCUDAMemoryInfo() async throws {
         let arrayBytes: Int = Int(pow(2.0, 26.0)) * MemoryLayout<Float32>.size  // ~256mb memory block
 
@@ -201,7 +199,7 @@ struct CUDATestMemComplex {
         let arrayBytes: Int = Int(pow(2.0, 26.0)) * MemoryLayout<Float32>.size
 
         let deviceStatus = CUDevice(index: 0).setDevice()
-        
+
         #expect(deviceStatus, "Can't set device \(deviceStatus)")
         var aPointer: UnsafeMutableRawPointer?
 
@@ -232,7 +230,6 @@ struct CUDATestMemComplex {
         #expect(memory.free > free, "Free memory wasn't bigger before 256mb cuda malloc on device")
         #expect((memory.free - free) == arrayBytes, "Difference beetwen memory allocated and free != to 256 mb")
     }
-
 
     @Test("Sequential memory info tests")
     func complexMemoryTest() async throws {
