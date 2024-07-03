@@ -49,7 +49,7 @@ struct KernelTest {
             #expect(syncStatus.asSwift.isSuccessful, "Can't sync device \(syncStatus)")
             let kernel = CUDAKernel(functionPointer: getKernelPointer(ADD_F32))
             let launchStatus = kernel.launch(arguments: kernelArgs, blockDim: blockDim, gridDim: gridDim)
-        
+
             #expect(launchStatus.isSuccessful, "Can't launch kernel \(launchStatus)")
 
             syncStatus = cudaDeviceSynchronize()
@@ -160,7 +160,7 @@ struct MemTest {
 
     // This test should be run on device that isn't using GPU at moment of running tests
     @Test func testCUDAMemoryInfo() throws {
-        let arrayBytes: Int = Int(pow(2.0, 26.0)) * MemoryLayout<Float32>.size // ~256mb memory block
+        let arrayBytes: Int = Int(pow(2.0, 26.0)) * MemoryLayout<Float32>.size  // ~256mb memory block
 
         let deviceStatus = CUDevice(index: 0).setDevice()
         #expect(deviceStatus, "Can't set device \(deviceStatus)")
@@ -176,7 +176,7 @@ struct MemTest {
         var memory = CUMemory()
         #expect(memory.free == 0 && memory.free == 0)
 
-        let _ = emptyPointer.cudaMemoryAllocate(0) // empty malloc to update memory
+        let _ = emptyPointer.cudaMemoryAllocate(0)  // empty malloc to update memory
         let _ = cudaDeviceSynchronize()
         var updateStatus = memory.updateCUDAMemory()
         #expect(updateStatus.isSuccessful)

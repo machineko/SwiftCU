@@ -1,8 +1,6 @@
 import Foundation
 import cxxCU
 
-
-
 /// custom inits
 extension CUDevice {}
 

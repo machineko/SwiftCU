@@ -50,8 +50,10 @@ public struct CUDAKernelArguments: ~Copyable {
     deinit {
         allocatedArguments?.deallocate()
         for (argPtr, cuPtr) in zip(argumentPointers, cuPointers) {
-            argPtr.deinitialize(count: 1); cuPtr.deinitialize(count: 1)
-            argPtr.deallocate(); cuPtr.deallocate()
+            argPtr.deinitialize(count: 1)
+            cuPtr.deinitialize(count: 1)
+            argPtr.deallocate()
+            cuPtr.deallocate()
         }
     }
 }
@@ -66,7 +68,6 @@ struct CUMemory: Sendable, ~Copyable {
 
 public struct CUDAKernel {
     let functionPointer: UnsafeRawPointer?
-
 
     func launch(arguments: consuming CUDAKernelArguments, blockDim: dim3, gridDim: dim3, sharedMemory: Int = 0) -> cudaError {
         let status = cudaLaunchKernel(
