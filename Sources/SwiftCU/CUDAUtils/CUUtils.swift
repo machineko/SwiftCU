@@ -1,6 +1,8 @@
 import Foundation
 import cxxCU
 
+
+
 /// custom inits
 extension CUDevice {}
 
@@ -190,4 +192,14 @@ extension UnsafeMutableRawPointer? {
         return status
     }
 
+}
+
+extension CUMemory {
+    mutating func updateCUDAMemory() -> cudaError {
+        let status = cudaMemGetInfo(&self.free, &self.total).asSwift
+        #if safetyCheck
+            status.safetyCheckCondition(message: "Can't copy memory from UnsafeRawPointer copyKind \(copyKind)")
+        #endif
+        return status
+    }
 }

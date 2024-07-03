@@ -13,6 +13,7 @@ public struct CUDAKernelArguments: ~Copyable {
 
     var argumentPointers: [UnsafeMutablePointer<UnsafeMutableRawPointer?>] = []
     var allocatedArguments: UnsafeMutablePointer<UnsafeMutableRawPointer?>?
+    var cuPointers: [UnsafeMutablePointer<UnsafeMutableRawPointer?>] = []
 
     // Add normal pointer to classical type (Int/Float etc.)
     mutating func addPointer(_ pointer: UnsafeMutablePointer<some Any>?) {
@@ -32,8 +33,10 @@ public struct CUDAKernelArguments: ~Copyable {
     mutating func addRawPointers(_ pointers: [UnsafeMutableRawPointer?]) {
         for p in pointers {
             let argumentPointer = UnsafeMutablePointer<UnsafeMutableRawPointer?>.allocate(capacity: 1)
-            argumentPointer.initialize(to: p.cuPoint)
+            let cuPoint = p.cuPoint
+            argumentPointer.initialize(to: cuPoint)
             argumentPointers.append(argumentPointer)
+            cuPointers.append(cuPoint)
         }
     }
 
@@ -46,9 +49,9 @@ public struct CUDAKernelArguments: ~Copyable {
 
     deinit {
         allocatedArguments?.deallocate()
-        for argumentPointer in argumentPointers {
-            argumentPointer.deinitialize(count: 1)
-            argumentPointer.deallocate()
+        for (argPtr, cuPtr) in zip(argumentPointers, cuPointers) {
+            argPtr.deinitialize(count: 1); cuPtr.deinitialize(count: 1)
+            argPtr.deallocate(); cuPtr.deallocate()
         }
     }
 }
@@ -57,8 +60,13 @@ public struct CUDevice: Sendable, ~Copyable {
     var index: Int32 = 0
 }
 
+struct CUMemory: Sendable, ~Copyable {
+    var (free, total): (size_t, size_t) = (0, 0)
+}
+
 public struct CUDAKernel {
     let functionPointer: UnsafeRawPointer?
+
 
     func launch(arguments: consuming CUDAKernelArguments, blockDim: dim3, gridDim: dim3, sharedMemory: Int = 0) -> cudaError {
         let status = cudaLaunchKernel(
