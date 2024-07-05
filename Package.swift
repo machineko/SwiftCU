@@ -1,12 +1,11 @@
 // swift-tools-version: 6.0
-// To turn on safetyCheck add -Xswiftc -DsafetyCheck
 
 import PackageDescription
 import Foundation
 
 let packageDir = URL(fileURLWithPath: #file).deletingLastPathComponent().path
 #if os(Windows)
-    let cuPath = ProcessInfo.processInfo.environment["CUDA_HOME"] ?? "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.4"
+    let cuPath = ProcessInfo.processInfo.environment["CUDA_HOME"] ?? fatalError("Need CUDA_HOME env to exists")
     let cuLibPath = "-L\(cuPath)\\lib\\x64"
     let cuIncludePath = "-I\(cuPath)\\include"
     let cxxLibPath = "-L\(packageDir)\\Sources\\cxxCU\\lib\\Release"
@@ -68,8 +67,11 @@ let package = Package(
             ]
         )
     ],
-    cxxLanguageStandard: .cxx17 // Only working with nil otherwise it tires to build C over Cxx for test target?
+    cxxLanguageStandard: .cxx17
 )
 
-///flags 
-/// -Xswiftc -L/usr/local/cuda/lib64 -Xswiftc -I/usr/local/cuda/include -Xswiftc -L$(pwd)/Sources/cxxCU/lib -Xswiftc -Drtx3090Test -Xswiftc -lcuADD
+/// usage 
+/// CUDA_HOME=/usr/local/cuda swift test 
+/// To turn on safetyCheck add -Xswiftc -DsafetyCheck
+/// Test on rtx 3090 -Xswiftc -Drtx3090Test -Xcc -Drtx3090Test -Xswiftc -L$(pwd)/Sources/cxxCU/lib -Xswiftc -lcuADD
+/// basic test flags -Xswiftc -L/usr/local/cuda/lib64 -Xswiftc -I/usr/local/cuda/include
