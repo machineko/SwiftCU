@@ -5,7 +5,7 @@ import Foundation
 
 let packageDir = URL(fileURLWithPath: #file).deletingLastPathComponent().path
 #if os(Windows)
-    let cuPath = ProcessInfo.processInfo.environment["CUDA_HOME"] ?? fatalError("Need CUDA_HOME env to exists")
+    let cuPath = ProcessInfo.processInfo.environment["CUDA_HOME"] ?? "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.5"
     let cuLibPath = "-L\(cuPath)\\lib\\x64"
     let cuIncludePath = "-I\(cuPath)\\include"
     let cxxLibPath = "-L\(packageDir)\\Sources\\cxxCU\\lib\\Release"
