@@ -66,7 +66,7 @@ struct CUMemory: Sendable, ~Copyable {
     var (free, total): (size_t, size_t) = (0, 0)
 }
 
-public struct CUDAKernel {
+public struct CUDAKernel: ~Copyable {
     let functionPointer: UnsafeRawPointer?
 
     func launch(arguments: consuming CUDAKernelArguments, blockDim: dim3, gridDim: dim3, sharedMemory: Int = 0) -> cudaError {
@@ -79,4 +79,13 @@ public struct CUDAKernel {
         return status
     }
 
+    func launch(arguments: consuming CUDAKernelArguments, blockDim: dim3, gridDim: dim3, stream: borrowing cudaStream, sharedMemory: Int = 0) -> cudaError {
+        let status = cudaLaunchKernel(
+            self.functionPointer, gridDim, blockDim, arguments.getArgsPointer(), sharedMemory, stream.stream
+        ).asSwift
+        #if safetyCheck
+            precondition(status.isSuccessful, "Can't launch kernel cudaErrorValue: \(status)")
+        #endif
+        return status
+    }
 }
