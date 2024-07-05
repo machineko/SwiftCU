@@ -84,6 +84,7 @@ struct CUDAMemBasicTest {
 }
 /// This tests should be run on device that isn't using GPU at moment of running tests
 /// Tests assume that no memory will be allocated on device memory while running
+#if strictMemoryTest
 struct CUDATestMemComplex {
     func testCUDAMemoryInfo() async throws {
         let arrayBytes: Int = Int(pow(2.0, 26.0)) * MemoryLayout<Float32>.size  // ~256mb memory block
@@ -160,3 +161,4 @@ struct CUDATestMemComplex {
         try await testCUDADeallocWithMemory()
     }
 }
+#endif
