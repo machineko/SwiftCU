@@ -85,80 +85,80 @@ struct CUDAMemBasicTest {
 /// This tests should be run on device that isn't using GPU at moment of running tests
 /// Tests assume that no memory will be allocated on device memory while running
 #if strictMemoryTest
-struct CUDATestMemComplex {
-    func testCUDAMemoryInfo() async throws {
-        let arrayBytes: Int = Int(pow(2.0, 26.0)) * MemoryLayout<Float32>.size  // ~256mb memory block
+    struct CUDATestMemComplex {
+        func testCUDAMemoryInfo() async throws {
+            let arrayBytes: Int = Int(pow(2.0, 26.0)) * MemoryLayout<Float32>.size  // ~256mb memory block
 
-        let deviceStatus = CUDevice(index: 0).setDevice()
-        #expect(deviceStatus, "Can't set device \(deviceStatus)")
+            let deviceStatus = CUDevice(index: 0).setDevice()
+            #expect(deviceStatus, "Can't set device \(deviceStatus)")
 
-        var emptyPointer: UnsafeMutableRawPointer?
-        var aPointer: UnsafeMutableRawPointer?
+            var emptyPointer: UnsafeMutableRawPointer?
+            var aPointer: UnsafeMutableRawPointer?
 
-        defer {
-            let _ = emptyPointer.cudaAndHostDeallocate()
-            let _ = aPointer.cudaAndHostDeallocate()
+            defer {
+                let _ = emptyPointer.cudaAndHostDeallocate()
+                let _ = aPointer.cudaAndHostDeallocate()
+            }
+
+            var memory = CUMemory()
+            #expect(memory.free == 0 && memory.free == 0)
+
+            let _ = emptyPointer.cudaMemoryAllocate(0)  // empty malloc to update memory
+            let _ = cudaDeviceSynchronize()
+            var updateStatus = memory.updateCUDAMemory()
+            #expect(updateStatus.isSuccessful)
+            #expect(memory.free > 0 && memory.free > 0)
+            let (free, total) = (memory.free, memory.total)
+            let allocateStatus = aPointer.cudaMemoryAllocate(arrayBytes)
+            #expect(allocateStatus.isSuccessful, "Can't allocate memory for aPointer \(allocateStatus)")
+            updateStatus = memory.updateCUDAMemory()
+
+            #expect(updateStatus.isSuccessful)
+            #expect(free > memory.free, "Free memory wasn't bigger before 256mb cuda malloc on device")
+            #expect(free - memory.free == arrayBytes, "Difference beetwen memory allocated and free != to 256 mb")
+            #expect(total == memory.total)
         }
 
-        var memory = CUMemory()
-        #expect(memory.free == 0 && memory.free == 0)
+        func testCUDADeallocWithMemory() async throws {
+            let arrayBytes: Int = Int(pow(2.0, 26.0)) * MemoryLayout<Float32>.size
 
-        let _ = emptyPointer.cudaMemoryAllocate(0)  // empty malloc to update memory
-        let _ = cudaDeviceSynchronize()
-        var updateStatus = memory.updateCUDAMemory()
-        #expect(updateStatus.isSuccessful)
-        #expect(memory.free > 0 && memory.free > 0)
-        let (free, total) = (memory.free, memory.total)
-        let allocateStatus = aPointer.cudaMemoryAllocate(arrayBytes)
-        #expect(allocateStatus.isSuccessful, "Can't allocate memory for aPointer \(allocateStatus)")
-        updateStatus = memory.updateCUDAMemory()
+            let deviceStatus = CUDevice(index: 0).setDevice()
 
-        #expect(updateStatus.isSuccessful)
-        #expect(free > memory.free, "Free memory wasn't bigger before 256mb cuda malloc on device")
-        #expect(free - memory.free == arrayBytes, "Difference beetwen memory allocated and free != to 256 mb")
-        #expect(total == memory.total)
+            #expect(deviceStatus, "Can't set device \(deviceStatus)")
+            var aPointer: UnsafeMutableRawPointer?
+
+            var memory = CUMemory()
+            #expect(memory.free == 0 && memory.free == 0)
+            let attributesPreAllocation: cudaPointerAttributes = aPointer.getCUDAAttributes()
+            #expect(attributesPreAllocation.type == cudaMemoryType.init(0), "Memory is allocated already")
+            #expect(aPointer.isAllocatedOnDevice() == false, "Memory is allocated on device")
+
+            let allocateStatus = aPointer.cudaMemoryAllocate(arrayBytes)
+            #expect(allocateStatus.isSuccessful, "Can't allocate memory for aPointer \(allocateStatus)")
+
+            var updateStatus = memory.updateCUDAMemory()
+            #expect(updateStatus.isSuccessful)
+            #expect(memory.free > 0 && memory.free > 0)
+            let free = memory.free
+
+            let attributesPostAllocation: cudaPointerAttributes = aPointer.getCUDAAttributes()
+            #expect(attributesPostAllocation.type == cudaMemoryType.init(2), "Memory type != cudaMemoryTypeDevice")
+            #expect(aPointer.isAllocatedOnDevice() == true, "Memory is not allocated on device")
+
+            let deallocateStatus = aPointer.cudaAndHostDeallocate()
+            #expect(deallocateStatus.isSuccessful, "Memory can't be deallocated \(deallocateStatus)")
+            updateStatus = memory.updateCUDAMemory()
+
+            #expect(updateStatus.isSuccessful)
+            #expect(updateStatus.isSuccessful)
+            #expect(memory.free > free, "Free memory wasn't bigger before 256mb cuda malloc on device")
+            #expect((memory.free - free) == arrayBytes, "Difference beetwen memory allocated and free != to 256 mb")
+        }
+
+        @Test("Sequential memory info tests")
+        func complexMemoryTest() async throws {
+            try await testCUDAMemoryInfo()
+            try await testCUDADeallocWithMemory()
+        }
     }
-
-    func testCUDADeallocWithMemory() async throws {
-        let arrayBytes: Int = Int(pow(2.0, 26.0)) * MemoryLayout<Float32>.size
-
-        let deviceStatus = CUDevice(index: 0).setDevice()
-
-        #expect(deviceStatus, "Can't set device \(deviceStatus)")
-        var aPointer: UnsafeMutableRawPointer?
-
-        var memory = CUMemory()
-        #expect(memory.free == 0 && memory.free == 0)
-        let attributesPreAllocation: cudaPointerAttributes = aPointer.getCUDAAttributes()
-        #expect(attributesPreAllocation.type == cudaMemoryType.init(0), "Memory is allocated already")
-        #expect(aPointer.isAllocatedOnDevice() == false, "Memory is allocated on device")
-
-        let allocateStatus = aPointer.cudaMemoryAllocate(arrayBytes)
-        #expect(allocateStatus.isSuccessful, "Can't allocate memory for aPointer \(allocateStatus)")
-
-        var updateStatus = memory.updateCUDAMemory()
-        #expect(updateStatus.isSuccessful)
-        #expect(memory.free > 0 && memory.free > 0)
-        let free = memory.free
-
-        let attributesPostAllocation: cudaPointerAttributes = aPointer.getCUDAAttributes()
-        #expect(attributesPostAllocation.type == cudaMemoryType.init(2), "Memory type != cudaMemoryTypeDevice")
-        #expect(aPointer.isAllocatedOnDevice() == true, "Memory is not allocated on device")
-
-        let deallocateStatus = aPointer.cudaAndHostDeallocate()
-        #expect(deallocateStatus.isSuccessful, "Memory can't be deallocated \(deallocateStatus)")
-        updateStatus = memory.updateCUDAMemory()
-
-        #expect(updateStatus.isSuccessful)
-        #expect(updateStatus.isSuccessful)
-        #expect(memory.free > free, "Free memory wasn't bigger before 256mb cuda malloc on device")
-        #expect((memory.free - free) == arrayBytes, "Difference beetwen memory allocated and free != to 256 mb")
-    }
-
-    @Test("Sequential memory info tests")
-    func complexMemoryTest() async throws {
-        try await testCUDAMemoryInfo()
-        try await testCUDADeallocWithMemory()
-    }
-}
 #endif

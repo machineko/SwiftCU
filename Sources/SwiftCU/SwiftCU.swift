@@ -79,7 +79,9 @@ public struct CUDAKernel: ~Copyable {
         return status
     }
 
-    func launch(arguments: consuming CUDAKernelArguments, blockDim: dim3, gridDim: dim3, stream: borrowing cudaStream, sharedMemory: Int = 0) -> cudaError {
+    func launch(
+        arguments: consuming CUDAKernelArguments, blockDim: dim3, gridDim: dim3, stream: borrowing cudaStream, sharedMemory: Int = 0
+    ) -> cudaError {
         let status = cudaLaunchKernel(
             self.functionPointer, gridDim, blockDim, arguments.getArgsPointer(), sharedMemory, stream.stream
         ).asSwift
