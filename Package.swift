@@ -29,8 +29,8 @@ let package = Package(
             targets: ["cxxCU"]),
     ],
     dependencies: [
-            .package(url: "https://github.com/apple/swift-testing.git", from: "0.2.0"),
-            .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.1.0"),
+            .package(url: "https://github.com/apple/swift-testing.git", from: "0.10.0"),
+            .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.3.0"),
 
     ],
     targets: [
