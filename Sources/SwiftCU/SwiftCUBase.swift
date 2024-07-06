@@ -58,17 +58,27 @@ public struct CUDAKernelArguments: ~Copyable {
     }
 }
 
+/// Represents a CUDA device.
 public struct CUDevice: Sendable, ~Copyable {
     var index: Int32 = 0
 }
 
-struct CUMemory: Sendable, ~Copyable {
+/// Represents CUDA memory information.
+public struct CUMemory: Sendable, ~Copyable {
     var (free, total): (size_t, size_t) = (0, 0)
 }
 
+/// Represents a CUDA kernel.
 public struct CUDAKernel: ~Copyable {
     let functionPointer: UnsafeRawPointer?
 
+    /// Launches the CUDA kernel with the specified arguments and configuration.
+    /// - Parameters:
+    ///   - arguments: The kernel arguments.
+    ///   - blockDim: The block dimensions.
+    ///   - gridDim: The grid dimensions.
+    ///   - sharedMemory: The amount of shared memory to be used.
+    /// - Returns: The CUDA error status.
     func launch(arguments: consuming CUDAKernelArguments, blockDim: dim3, gridDim: dim3, sharedMemory: Int = 0) -> cudaError {
         let status = cudaLaunchKernel(
             self.functionPointer, gridDim, blockDim, arguments.getArgsPointer(), sharedMemory, nil
@@ -79,6 +89,14 @@ public struct CUDAKernel: ~Copyable {
         return status
     }
 
+    /// Launches the CUDA kernel with the specified arguments and configuration, using a specific stream.
+    /// - Parameters:
+    ///   - arguments: The kernel arguments.
+    ///   - blockDim: The block dimensions.
+    ///   - gridDim: The grid dimensions.
+    ///   - stream: The CUDA stream to be used.
+    ///   - sharedMemory: The amount of shared memory to be used.
+    /// - Returns: The CUDA error status.
     func launch(
         arguments: consuming CUDAKernelArguments, blockDim: dim3, gridDim: dim3, stream: borrowing cudaStream, sharedMemory: Int = 0
     ) -> cudaError {

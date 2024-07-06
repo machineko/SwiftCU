@@ -1,3 +1,3 @@
-enum cudaMemoryCopyType: UInt32 {
+public enum cudaMemoryCopyType: UInt32 {
     case cudaMemcpyHostToHost, cudaMemcpyHostToDevice, cudaMemcpyDeviceToHost, cudaMemcpyDeviceToDevice, cudaMemcpyDefault
 }

@@ -1,4 +1,4 @@
-enum cudaError: Int {
+public enum cudaError: Int {
     ///
     /// The API call returned with no errors. In the case of query calls, this
     /// also means that the operation being queried is complete (see
