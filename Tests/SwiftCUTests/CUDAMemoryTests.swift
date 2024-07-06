@@ -1,9 +1,10 @@
 import Foundation
-import Testing
+@_spi(Experimental) import Testing
 
 @testable import SwiftCU
 @testable import cxxCU
 
+@Suite("Basic memory tests")
 struct CUDAMemBasicTest {
 
     @Test func testCUDAAsyncCopy() async throws {
@@ -83,10 +84,12 @@ struct CUDAMemBasicTest {
 
 }
 /// This tests should be run on device that isn't using GPU at moment of running tests
-/// Tests assume that no memory will be allocated on device memory while running
+/// Tests assume that no memory will be allocated on device while running
 #if strictMemoryTest
+    @Suite("Test complex allocations and deallocation API", .serialized)
     struct CUDATestMemComplex {
-        func testCUDAMemoryInfo() async throws {
+
+        @Test func testCUDAMemoryInfo() throws {
             let arrayBytes: Int = Int(pow(2.0, 26.0)) * MemoryLayout<Float32>.size  // ~256mb memory block
 
             let deviceStatus = CUDevice(index: 0).setDevice()
@@ -119,7 +122,7 @@ struct CUDAMemBasicTest {
             #expect(total == memory.total)
         }
 
-        func testCUDADeallocWithMemory() async throws {
+        @Test func testCUDADeallocWithMemory() throws {
             let arrayBytes: Int = Int(pow(2.0, 26.0)) * MemoryLayout<Float32>.size
 
             let deviceStatus = CUDevice(index: 0).setDevice()
@@ -153,12 +156,6 @@ struct CUDAMemBasicTest {
             #expect(updateStatus.isSuccessful)
             #expect(memory.free > free, "Free memory wasn't bigger before 256mb cuda malloc on device")
             #expect((memory.free - free) == arrayBytes, "Difference beetwen memory allocated and free != to 256 mb")
-        }
-
-        @Test("Sequential memory info tests")
-        func complexMemoryTest() async throws {
-            try await testCUDAMemoryInfo()
-            try await testCUDADeallocWithMemory()
         }
     }
 #endif

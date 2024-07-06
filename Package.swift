@@ -29,8 +29,10 @@ let package = Package(
             targets: ["cxxCU"]),
     ],
     dependencies: [
-            .package(url: "https://github.com/apple/swift-testing.git", from: "0.2.0")
-        ],
+            .package(url: "https://github.com/apple/swift-testing.git", from: "0.2.0"),
+            .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.1.0"),
+
+    ],
     targets: [
         .target(
             name: "cxxCU",
@@ -72,6 +74,6 @@ let package = Package(
 
 /// usage 
 /// CUDA_HOME=/usr/local/cuda swift test 
-/// To turn on safetyCheck add -Xswiftc -DsafetyCheck
+/// To turn on safetyCheck add -Xswiftc -DsafetyCheck 
 /// Test on rtx 3090 -Xswiftc -Drtx3090Test -Xcc -Drtx3090Test -Xswiftc -L$(pwd)/Sources/cxxCU/lib -Xswiftc -lcuADD
 /// basic test flags -Xswiftc -L/usr/local/cuda/lib64 -Xswiftc -I/usr/local/cuda/include
