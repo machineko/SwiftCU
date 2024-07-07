@@ -113,7 +113,7 @@ public extension cudaMemoryCopyType {
 
 /// A structure representing a CUDA stream.
 public struct cudaStream: ~Copyable {
-    var stream: cudaStream_t?
+    public var stream: cudaStream_t?
 
     /// Initializes a new CUDA stream.
     ///

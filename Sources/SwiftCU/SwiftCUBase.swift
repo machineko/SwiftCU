@@ -1,6 +1,6 @@
 import cxxCU
 
-extension UnsafeMutableRawPointer? {
+public extension UnsafeMutableRawPointer? {
     var cuPoint: UnsafeMutablePointer<UnsafeMutableRawPointer?> {
         let argumentPointer = UnsafeMutablePointer<UnsafeMutableRawPointer?>.allocate(capacity: 1)
         argumentPointer.initialize(to: self)
@@ -11,12 +11,17 @@ extension UnsafeMutableRawPointer? {
 // Pointer to pointer magic for cuda calling
 public struct CUDAKernelArguments: ~Copyable {
 
-    var argumentPointers: [UnsafeMutablePointer<UnsafeMutableRawPointer?>] = []
-    var allocatedArguments: UnsafeMutablePointer<UnsafeMutableRawPointer?>?
-    var cuPointers: [UnsafeMutablePointer<UnsafeMutableRawPointer?>] = []
+    public var argumentPointers: [UnsafeMutablePointer<UnsafeMutableRawPointer?>] = []
+    public var allocatedArguments: UnsafeMutablePointer<UnsafeMutableRawPointer?>?
+    public var cuPointers: [UnsafeMutablePointer<UnsafeMutableRawPointer?>] = []
+
+    public init() {
+        self.argumentPointers = []
+        self.cuPointers = []
+    }
 
     // Add normal pointer to classical type (Int/Float etc.)
-    mutating func addPointer(_ pointer: UnsafeMutablePointer<some Any>?) {
+    public mutating func addPointer(_ pointer: UnsafeMutablePointer<some Any>?) {
         let rawPointer = UnsafeMutableRawPointer(pointer)
         let argumentPointer = UnsafeMutablePointer<UnsafeMutableRawPointer?>.allocate(capacity: 1)
         argumentPointer.initialize(to: rawPointer)
@@ -24,13 +29,13 @@ public struct CUDAKernelArguments: ~Copyable {
     }
 
     // Pointer to pointer for single UnsafeMutableRawPointer
-    mutating func addRawPointer(_ pointer: UnsafeMutableRawPointer?) {
+    public mutating func addRawPointer(_ pointer: UnsafeMutableRawPointer?) {
         let argumentPointer = UnsafeMutablePointer<UnsafeMutableRawPointer?>.allocate(capacity: 1)
         argumentPointer.initialize(to: pointer)
         argumentPointers.append(argumentPointer)
     }
 
-    mutating func addRawPointers(_ pointers: [UnsafeMutableRawPointer?]) {
+    public mutating func addRawPointers(_ pointers: [UnsafeMutableRawPointer?]) {
         for p in pointers {
             let argumentPointer = UnsafeMutablePointer<UnsafeMutableRawPointer?>.allocate(capacity: 1)
             let cuPoint = p.cuPoint
@@ -40,7 +45,7 @@ public struct CUDAKernelArguments: ~Copyable {
         }
     }
 
-    mutating func getArgsPointer() -> UnsafeMutablePointer<UnsafeMutableRawPointer?>? {
+    public mutating func getArgsPointer() -> UnsafeMutablePointer<UnsafeMutableRawPointer?>? {
         let count = argumentPointers.count
         allocatedArguments = UnsafeMutablePointer<UnsafeMutableRawPointer?>.allocate(capacity: count)
         allocatedArguments?.initialize(from: argumentPointers.map(\.pointee), count: count)
@@ -60,17 +65,30 @@ public struct CUDAKernelArguments: ~Copyable {
 
 /// Represents a CUDA device.
 public struct CUDevice: Sendable, ~Copyable {
-    var index: Int32 = 0
+    public var index: Int32 = 0
+    
+    public init(index: Int32 = 0) {
+        self.index = index
+    }
 }
 
 /// Represents CUDA memory information.
 public struct CUMemory: Sendable, ~Copyable {
-    var (free, total): (size_t, size_t) = (0, 0)
+    public var (free, total): (size_t, size_t)
+
+    public init() {
+        self.free = 0
+        self.total = 0
+    }
 }
 
 /// Represents a CUDA kernel.
 public struct CUDAKernel: ~Copyable {
-    let functionPointer: UnsafeRawPointer?
+    public let functionPointer: UnsafeRawPointer?
+
+    public init(functionPointer: UnsafeRawPointer?) {
+        self.functionPointer = functionPointer
+    }
 
     /// Launches the CUDA kernel with the specified arguments and configuration.
     /// - Parameters:
@@ -79,7 +97,7 @@ public struct CUDAKernel: ~Copyable {
     ///   - gridDim: The grid dimensions.
     ///   - sharedMemory: The amount of shared memory to be used.
     /// - Returns: The CUDA error status.
-    func launch(arguments: consuming CUDAKernelArguments, blockDim: dim3, gridDim: dim3, sharedMemory: Int = 0) -> cudaError {
+    public func launch(arguments: consuming CUDAKernelArguments, blockDim: dim3, gridDim: dim3, sharedMemory: Int = 0) -> cudaError {
         let status = cudaLaunchKernel(
             self.functionPointer, gridDim, blockDim, arguments.getArgsPointer(), sharedMemory, nil
         ).asSwift
@@ -97,7 +115,7 @@ public struct CUDAKernel: ~Copyable {
     ///   - stream: The CUDA stream to be used.
     ///   - sharedMemory: The amount of shared memory to be used.
     /// - Returns: The CUDA error status.
-    func launch(
+    public func launch(
         arguments: consuming CUDAKernelArguments, blockDim: dim3, gridDim: dim3, stream: borrowing cudaStream, sharedMemory: Int = 0
     ) -> cudaError {
         let status = cudaLaunchKernel(
