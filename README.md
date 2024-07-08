@@ -3,6 +3,12 @@
 SwiftCU is a wrapper for CUDA runtime API's (exposed as cxxCU) with extra utilities for device management, memory ops and kernel execution, along with a robust suite of tests.
 Repo is tested on newest (v12.5) CUDA runtime API on both Linux and Windows.
 
+| Operating System | Swift Version | CUDA Version | Supported |
+|------------------|---------------|--------------|-----------|
+| Linux            | 6.0           | 12.*         | ✅        |
+| Windows 11       | 6.0           | 12.*         | ✅        |
+
+
 ## Installation
 
 To include SwiftCU in your Swift project, add the following line to your `Package.swift` file:
