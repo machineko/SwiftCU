@@ -1,0 +1,25 @@
+{
+    "theme": {
+        "color": {
+            "nvidia-green": "rgb(118, 185, 0)",
+            "link": "rgb(118, 185, 0)",
+            "nav-dark-link-color":  "rgb(118, 185, 0)",
+            "nav-link-color":  "rgb(118, 185, 0)",
+            "documentation-intro-title":  "rgb(118, 185, 0)",
+            "nav-root-title":  "rgb(118, 185, 0)"
+        }
+    },
+    "meta": {
+        "title": "Swift CUDA runtime Documentation"
+    },
+    "features": {
+        "docs": {
+            "quickNavigation": {
+                "enable": true
+            },
+            "onThisPageNavigator": {
+                "disable": true
+            }
+        }
+    }
+}
