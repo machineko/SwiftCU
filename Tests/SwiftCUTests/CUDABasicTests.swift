@@ -8,10 +8,12 @@ struct DeviceTest {
         #expect(cuStatus)
     }
 
+    #if(!safetyCheck)
     @Test func testDeviceInitFail() async throws {
         let cuStatus = CUDevice(index: -1).setDevice()
         #expect(!cuStatus)
     }
+    #endif
 
     @Test func testCUDAStreamCreation() async throws {
         let cuStatus = CUDevice(index: 0).setDevice()

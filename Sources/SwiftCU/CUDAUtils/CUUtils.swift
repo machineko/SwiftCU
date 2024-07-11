@@ -146,7 +146,7 @@ public struct cudaStream: ~Copyable {
 
     /// Destroys the CUDA stream.
     deinit {
-        let status = cudaStreamDestroy(self.stream)
+        let status = cudaStreamDestroy(self.stream).asSwift
         #if safetyCheck
             status.safetyCheckCondition(message: "Can't destroy stream")
         #endif
@@ -382,7 +382,7 @@ public extension CUMemory {
     mutating func updateCUDAMemory() -> cudaError {
         let status = cudaMemGetInfo(&self.free, &self.total).asSwift
         #if safetyCheck
-            status.safetyCheckCondition(message: "Can't copy memory from UnsafeRawPointer copyKind \(copyKind)")
+            status.safetyCheckCondition(message: "Can't get cuda memory info \(status)")
         #endif
         return status
     }
