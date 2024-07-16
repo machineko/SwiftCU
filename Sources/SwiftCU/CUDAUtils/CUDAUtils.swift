@@ -108,6 +108,12 @@ public extension cudaMemoryCopyType {
     }
 }
 
+public extension SwifCUDADataType {
+    var asCUDA: cudaDataType_t {
+        return cudaDataType_t(UInt32(self.rawValue))
+    }
+}
+
 /// A structure representing a CUDA stream.
 public struct cudaStream: ~Copyable {
     public var stream: cudaStream_t?
