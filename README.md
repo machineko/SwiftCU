@@ -27,7 +27,7 @@ CUDA runtime [CUDART](https://docs.nvidia.com/cuda/cuda-runtime-api/index.html)
 ```swift
 import SwiftCU
 
-let deviceStatus = CUDevice(index: 0).setDevice()
+let deviceStatus = CUDADevice(index: 0).setDevice()
 if deviceStatus {
     print("Device initialized successfully")
 } else {
