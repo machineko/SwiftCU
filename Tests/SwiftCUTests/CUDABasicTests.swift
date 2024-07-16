@@ -4,19 +4,19 @@ import Testing
 
 struct DeviceTest {
     @Test func testDeviceInit() async throws {
-        let cuStatus = CUDevice(index: 0).setDevice()
+        let cuStatus = CUDADevice(index: 0).setDevice()
         #expect(cuStatus)
     }
 
     #if(!safetyCheck)
     @Test func testDeviceInitFail() async throws {
-        let cuStatus = CUDevice(index: -1).setDevice()
+        let cuStatus = CUDADevice(index: -1).setDevice()
         #expect(!cuStatus)
     }
     #endif
 
     @Test func testCUDAStreamCreation() async throws {
-        let cuStatus = CUDevice(index: 0).setDevice()
+        let cuStatus = CUDADevice(index: 0).setDevice()
         #expect(cuStatus)
         let stream = cudaStream()
         #expect(stream.stream != nil)
@@ -24,7 +24,7 @@ struct DeviceTest {
 
     #if rtx3090Test
         @Test func testRTX3090Properties() async throws {
-            let device = CUDevice(index: 0)
+            let device = CUDADevice(index: 0)
             let prop = device.getDeviceProperties()
             #expect(prop.deviceName == "NVIDIA GeForce RTX 3090")
             #expect(prop.major == 8)

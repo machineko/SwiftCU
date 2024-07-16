@@ -16,7 +16,7 @@ def read_cuda_error_enum(file_path):
 
 def convert_cpp_enum_to_swift(cpp_enum):
     lines = cpp_enum.split('\n')
-    swift_enum = "enum cudaError: Int {\n"
+    swift_enum = "public enum cudaError: Int {\n"
     docstring = ""
     for line in lines:
         if "enum" in line or "{" in line or "}" in line:
@@ -51,8 +51,8 @@ if __name__ == "__main__":
     cuda_error = read_cuda_error_enum(get_cuda_driver_path())
     if cuda_error:
         swift_enum = convert_cpp_enum_to_swift(cuda_error)
-        write_to_file(Path("Sources/SwiftCU/CUDATypes/CUError.swift"), swift_enum)
-        file_path = os.path.normpath("Sources/SwiftCU/CUDATypes/CUError.swift")
+        write_to_file(Path("Sources/SwiftCU/CUDATypes/CUDAError.swift"), swift_enum)
+        file_path = os.path.normpath("Sources/SwiftCU/CUDATypes/CUDAError.swift")
         os.system(f"swift-format {file_path} -i {file_path}")
     else:
         raise FileNotFoundError(f"Can't find cudaError file {get_cuda_driver_path()}")

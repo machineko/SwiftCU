@@ -1,9 +1,6 @@
 import Foundation
 import cxxCU
 
-/// Custom initializers for `CUDevice`
-public extension CUDevice {}
-
 /// Conformance to `Equatable` for `cudaError`
 extension cudaError: Equatable {
     /// Checks if two `cudaError` values are equal
@@ -52,7 +49,7 @@ public extension cudaDeviceProp {
     }
 }
 
-public extension CUDevice {
+public extension CUDADevice {
     /// Retrieves the properties of the CUDA device.
     /// - Returns: The `cudaDeviceProp` structure containing the device properties.
     /// - Note: This function will terminate the program if it fails to get the device properties.
@@ -75,7 +72,7 @@ public extension CUDevice {
 }
 
 /// Device creation extensions for `CUDevice`
-public extension CUDevice {
+public extension CUDADevice {
     /// Sets the current CUDA device.
     /// - Returns: A Boolean value indicating whether the device was successfully set.
     ///
@@ -368,7 +365,7 @@ public extension UnsafeMutableRawPointer? {
     }
 }
 
-public extension CUMemory {
+public extension CUDAMemory {
     /// Updates the CUDA memory information.
     /// - Returns: The `cudaError` indicating the result of the update operation.
     ///

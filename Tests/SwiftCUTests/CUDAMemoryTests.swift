@@ -8,7 +8,7 @@ import Foundation
 struct CUDAMemBasicTest {
 
     @Test func testCUDAAsyncCopy() async throws {
-        let cuStatus = CUDevice(index: 0).setDevice()
+        let cuStatus = CUDADevice(index: 0).setDevice()
         #expect(cuStatus)
         let stream = cudaStream()
         #expect(stream.stream != nil)
@@ -44,7 +44,7 @@ struct CUDAMemBasicTest {
     @Test func testCUDAPointerAttribute() async throws {
         let arrayBytes: Int = 64 * MemoryLayout<Float32>.size
 
-        let deviceStatus = CUDevice(index: 0).setDevice()
+        let deviceStatus = CUDADevice(index: 0).setDevice()
         #expect(deviceStatus, "Can't set device \(deviceStatus)")
 
         var aPointer: UnsafeMutableRawPointer?
@@ -62,7 +62,7 @@ struct CUDAMemBasicTest {
     @Test func testCUDADealloc() async throws {
         let arrayBytes: Int = 64 * MemoryLayout<Float32>.size
 
-        let deviceStatus = CUDevice(index: 0).setDevice()
+        let deviceStatus = CUDADevice(index: 0).setDevice()
         #expect(deviceStatus, "Can't set device \(deviceStatus)")
 
         var aPointer: UnsafeMutableRawPointer?
@@ -92,7 +92,7 @@ struct CUDAMemBasicTest {
         @Test func testCUDAMemoryInfo() throws {
             let arrayBytes: Int = Int(pow(2.0, 26.0)) * MemoryLayout<Float32>.size  // ~256mb memory block
 
-            let deviceStatus = CUDevice(index: 0).setDevice()
+            let deviceStatus = CUDADevice(index: 0).setDevice()
             #expect(deviceStatus, "Can't set device \(deviceStatus)")
 
             var emptyPointer: UnsafeMutableRawPointer?
@@ -125,7 +125,7 @@ struct CUDAMemBasicTest {
         @Test func testCUDADeallocWithMemory() throws {
             let arrayBytes: Int = Int(pow(2.0, 26.0)) * MemoryLayout<Float32>.size
 
-            let deviceStatus = CUDevice(index: 0).setDevice()
+            let deviceStatus = CUDADevice(index: 0).setDevice()
 
             #expect(deviceStatus, "Can't set device \(deviceStatus)")
             var aPointer: UnsafeMutableRawPointer?

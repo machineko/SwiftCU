@@ -64,7 +64,7 @@ public struct CUDAKernelArguments: ~Copyable {
 }
 
 /// Represents a CUDA device.
-public struct CUDevice: Sendable, ~Copyable {
+public struct CUDADevice: Sendable, ~Copyable {
     public var index: Int32 = 0
     
     public init(index: Int32 = 0) {
@@ -73,7 +73,7 @@ public struct CUDevice: Sendable, ~Copyable {
 }
 
 /// Represents CUDA memory information.
-public struct CUMemory: Sendable, ~Copyable {
+public struct CUDAMemory: Sendable, ~Copyable {
     public var (free, total): (size_t, size_t)
 
     public init() {

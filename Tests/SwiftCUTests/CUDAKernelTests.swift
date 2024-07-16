@@ -10,7 +10,7 @@ struct KernelTest {
         @Test func testAddKernel() async throws {
             let arraySize: Int = 32
             let arrayBytes: Int = arraySize * MemoryLayout<Float32>.size
-            let deviceStatus = CUDevice(index: 0).setDevice()
+            let deviceStatus = CUDADevice(index: 0).setDevice()
             #expect(deviceStatus, "Can't set device \(deviceStatus)")
 
             var aPointer: UnsafeMutableRawPointer?
@@ -82,7 +82,7 @@ struct KernelTest {
         @Test func testAddKernelStream() async throws {
             let arraySize: Int = 32
             let arrayBytes: Int = arraySize * MemoryLayout<Float32>.size
-            let deviceStatus = CUDevice(index: 0).setDevice()
+            let deviceStatus = CUDADevice(index: 0).setDevice()
             #expect(deviceStatus, "Can't set device \(deviceStatus)")
             let stream = cudaStream()
             #expect(stream.stream != nil)
