@@ -56,7 +56,7 @@ public extension CUDADevice {
     ///
     /// # Example
     /// ```
-    /// let device = CUDevice(index: 0)
+    /// let device = CUDADevice(index: 0)
     /// let properties = device.getDeviceProperties()
     /// print("Device name: \(properties.deviceName)")
     /// ```
@@ -71,14 +71,14 @@ public extension CUDADevice {
     }
 }
 
-/// Device creation extensions for `CUDevice`
+/// Device creation extensions for `CUDADevice`
 public extension CUDADevice {
     /// Sets the current CUDA device.
     /// - Returns: A Boolean value indicating whether the device was successfully set.
     ///
     /// # Example
     /// ```
-    /// let deviceStatus = CUDevice(index: 0).setDevice()
+    /// let deviceStatus = CUDADevice(index: 0).setDevice()
     /// assert(deviceStatus)
     /// ```
     func setDevice() -> Bool {
