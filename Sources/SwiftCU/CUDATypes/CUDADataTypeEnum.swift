@@ -1,4 +1,4 @@
-public enum cudaDataType: Int {
+public enum SwifCUDADataType: Int {
   case CUDA_R_16F = 2
   case CUDA_C_16F = 6  //real as a half
   case CUDA_R_16BF = 14  //complex as a pair of half numbers

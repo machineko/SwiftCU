@@ -10,7 +10,7 @@ def read_cublas_enum(file_path):
 def convert_cpp_enum_to_swift(cpp_enum):
     enums = re.findall(r'typedef\s+enum\s+\w*\s*\{([^}]*)\}\s*(\w+);', cpp_enum, re.DOTALL)
     lines = enums[0][0].split('\n')
-    swift_enum = "public enum cudaDataType: Int {\n"
+    swift_enum = "public enum SwifCUDADataType: Int {\n"
     docstring = ""
     for line in lines:
         line = line.strip()
