@@ -16,6 +16,11 @@ def convert_cpp_enum_to_swift(cpp_enum):
         line = line.strip()
         if not line or "{" in line or "}" in line:
             continue
+        
+        if "/*" in line:
+            docstring = "    //" + line.split("/*")[1].strip().replace("*/", "")
+        elif "*" in line:
+            docstring = "    //" + line.split("*")[1].strip()
         if "=" in line:
             parts = line.split('=')
             enum_name = parts[0].strip()
@@ -23,12 +28,7 @@ def convert_cpp_enum_to_swift(cpp_enum):
 
             swift_enum += f"    case {enum_name} = {enum_value} {docstring}\n"
             if docstring:
-                # swift_enum += f"{docstring}"
                 docstring = ""
-        if "/*" in line:
-            docstring = "    //" + line.split("/*")[1].strip().replace("*/", "")
-        elif "*" in line:
-            docstring = "    //" + line.split("*")[1].strip()
     swift_enum += "}"
     return swift_enum
 
