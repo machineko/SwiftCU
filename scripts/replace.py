@@ -53,7 +53,6 @@ if __name__ == "__main__":
         swift_enum = convert_cpp_enum_to_swift(cuda_error)
         write_to_file(Path("Sources/SwiftCU/CUDATypes/CUDAError.swift"), swift_enum)
         file_path = os.path.normpath("Sources/SwiftCU/CUDATypes/CUDAError.swift")
-        os.system(f"swift-format {file_path} -i {file_path}")
     else:
         raise FileNotFoundError(f"Can't find cudaError file {get_cuda_driver_path()}")
     

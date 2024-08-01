@@ -1,7 +1,7 @@
 import cxxCU
 
-public extension UnsafeMutableRawPointer? {
-    var cuPoint: UnsafeMutablePointer<UnsafeMutableRawPointer?> {
+extension UnsafeMutableRawPointer? {
+    public var cuPoint: UnsafeMutablePointer<UnsafeMutableRawPointer?> {
         let argumentPointer = UnsafeMutablePointer<UnsafeMutableRawPointer?>.allocate(capacity: 1)
         argumentPointer.initialize(to: self)
         return argumentPointer
@@ -66,7 +66,7 @@ public struct CUDAKernelArguments: ~Copyable {
 /// Represents a CUDA device.
 public struct CUDADevice: Sendable, ~Copyable {
     public var index: Int32 = 0
-    
+
     public init(index: Int32 = 0) {
         self.index = index
     }
