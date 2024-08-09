@@ -136,6 +136,10 @@ public struct cudaStream: ~Copyable {
         status.safetyCheckCondition(message: "Can't create stream")
     }
 
+    public init(stream: cudaStream_t) {
+        self.stream = stream
+    }
+
     /// Synchronizes the CUDA stream.
     /// - Returns: The `cudaError` indicating the result of the synchronization operation.
     ///
