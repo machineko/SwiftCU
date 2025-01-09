@@ -28,9 +28,6 @@ let package = Package(
             name: "cxxCU",
             targets: ["cxxCU"]),
     ],
-    dependencies: [
-            .package(url: "https://github.com/apple/swift-testing.git", from: "0.10.0"),
-    ],
     targets: [
         .target(
             name: "cxxCU",
@@ -57,8 +54,7 @@ let package = Package(
         .testTarget(
             name: "SwiftCUTests",
             dependencies: [
-                "SwiftCU", "cxxCU",
-                .product(name: "Testing", package: "swift-testing"), 
+                "SwiftCU", "cxxCU"
             ],
              swiftSettings: [
                 .interoperabilityMode(.Cxx),

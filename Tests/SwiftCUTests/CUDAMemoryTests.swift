@@ -1,5 +1,5 @@
 import Foundation
-@_spi(Experimental) import Testing
+import Testing
 
 @testable import SwiftCU
 @testable import cxxCU
