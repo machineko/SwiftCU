@@ -2,7 +2,7 @@
 SOURCE_DIRS=("Sources" "Tests")
 FORMAT_CONFIG="format.json"
 
-if ! command -v swift-format &> /dev/null
+if ! command -v swift format &> /dev/null
 then
     echo "swift-format could not be found. Please install it first."
     exit 1
@@ -20,7 +20,7 @@ for DIR in "${SOURCE_DIRS[@]}"; do
     fi
     find "$DIR" -type f -name "*.swift" -print0 | while IFS= read -r -d '' file; do
         echo "$file"
-        swift-format format --configuration "$FORMAT_CONFIG" "$file" -i
+        swift format format --configuration "$FORMAT_CONFIG" "$file" -i
     done
 done
 

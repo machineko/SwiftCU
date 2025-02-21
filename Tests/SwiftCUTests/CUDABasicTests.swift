@@ -3,6 +3,7 @@ import Testing
 @testable import SwiftCU
 
 struct DeviceTest {
+
     @Test func testDeviceInit() async throws {
         let cuStatus = CUDADevice(index: 0).setDevice()
         #expect(cuStatus)

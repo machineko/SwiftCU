@@ -10,7 +10,7 @@ let packageDir = URL(fileURLWithPath: #file).deletingLastPathComponent().path
     let cuIncludePath = "-I\(cuPath)\\include"
     let cxxLibPath = "-L\(packageDir)\\Sources\\cxxCU\\lib\\Release"
 #elseif os(Linux)
-    let cuPath = ProcessInfo.processInfo.environment["CUDA_HOME"] ?? "/usr/local/cuda"
+    let cuPath = ProcessInfo.processInfo.environment["CUDA_HOME"]! // ?? "/usr/local/cuda"
     let cuLibPath = "-L\(cuPath)/lib64"
     let cuIncludePath = "-I\(cuPath)/include"
     let cxxLibPath = "-L\(packageDir)/Sources/cxxCU/lib"
@@ -23,9 +23,11 @@ let package = Package(
     products: [
         .library(
             name: "SwiftCU",
+            type: .static,
             targets: ["SwiftCU"]),
         .library(
             name: "cxxCU",
+            type: .static,
             targets: ["cxxCU"]),
     ],
     targets: [
@@ -38,9 +40,9 @@ let package = Package(
             linkerSettings: [
                 .unsafeFlags([
                     cuLibPath,
-                    cxxLibPath,
                 ]),
                 .linkedLibrary("cudart"),
+                .linkedLibrary("cuda")
             ]
         ),
         .target(
@@ -48,7 +50,14 @@ let package = Package(
             dependencies: ["cxxCU"],
             swiftSettings: [
                 .interoperabilityMode(.Cxx),
-                .unsafeFlags(["-Xcc", cuIncludePath]),
+                .unsafeFlags(["-Xcc", cuIncludePath, "-Xlinker", cuLibPath]),
+            ],
+            linkerSettings: [
+                .unsafeFlags([
+                    cuLibPath
+                ]),
+                .linkedLibrary("cudart"),
+                .linkedLibrary("cuda")
             ]
         ),
         .testTarget(
@@ -58,6 +67,13 @@ let package = Package(
             ],
              swiftSettings: [
                 .interoperabilityMode(.Cxx),
+            ],
+               linkerSettings: [
+                .unsafeFlags([
+                    cuLibPath
+                ]),
+                .linkedLibrary("cudart"),
+                .linkedLibrary("cuda")
             ]
         )
     ],

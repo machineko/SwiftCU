@@ -2,5 +2,6 @@ module cxxCU {
     requires cplusplus
     header "cuhead.hpp"
     link "cudart"
+    link "cuda"
     export *
 }
